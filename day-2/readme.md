@@ -72,12 +72,40 @@ eksctl create cluster --name=observability \
                       --zones=us-east-1a,us-east-1b \
                       --without-nodegroup
 ```
+Explanation:
+
+eksctl create cluster → Creates a new Amazon EKS (Elastic Kubernetes Service) cluster.
+
+--name=observability → The name of the cluster will be “observability”.
+
+--region=us-east-1 → Deploys the cluster in AWS region us-east-1.
+
+--zones=us-east-1a,us-east-1b → Uses two Availability Zones for high availability.
+
+--without-nodegroup → Creates only the control plane, no worker nodes yet.
+
+✅ So after this command, the EKS control plane (API server, etcd, etc.) is up, but no EC2 worker nodes exist
+
+
+
+
+
 ```bash
 eksctl utils associate-iam-oidc-provider \
     --region us-east-1 \
     --cluster observability \
     --approve
 ```
+
+Explanation:
+
+- OIDC (OpenID Connect) provider allows your cluster’s service accounts to use IAM roles.  
+- This enables fine-grained permissions for pods (via IAM Roles for Service Accounts — IRSA).
+
+✅ This command links your EKS cluster to an AWS-managed OIDC identity provider, which is required for using IAM roles at the pod level.
+
+
+
 ```bash
 eksctl create nodegroup --cluster=observability \
                         --region=us-east-1 \
@@ -94,16 +122,16 @@ eksctl create nodegroup --cluster=observability \
                         --alb-ingress-access \
                         --node-private-networking
 
-
-
+```
 
 # Update ./kube/config file
-aws eks update-kubeconfig --name observability
-```
+
+    aws eks update-kubeconfig --name observability
+
 
 # Node groups in public subnets
 
-              eksctl create nodegroup --cluster=observability \
+    eksctl create nodegroup --cluster=observability \
     --region=ap-south-1 \
     --name=observability-ng-public \
     --node-type=t3.medium \
@@ -118,6 +146,8 @@ aws eks update-kubeconfig --name observability
     --full-ecr-access \
     --appmesh-access \
     --alb-ingress-access
+
+<img width="848" height="711" alt="image" src="https://github.com/user-attachments/assets/fe2046c4-87f0-4a7c-ae2b-f50fdb523e4c" />
 
 
 ### 🧰 Step 2: Install kube-prometheus-stack
